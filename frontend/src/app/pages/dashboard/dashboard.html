@@ -1,0 +1,73 @@
+<div class="dashboard">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Bienvenue sur votre page de gestion, <strong>{{ (auth.currentUser$ | async)?.name }}</strong> 👋</p>
+    </div>
+    <a mat-flat-button routerLink="/products/new" class="add-btn">
+      <mat-icon>add</mat-icon>
+      Nouveau produit
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else {
+
+    <!-- Cartes stats -->
+    <div class="stats-grid">
+      @for (stat of stats(); track stat.label) {
+        <div class="stat-card">
+          <div class="stat-icon" [style.background]="stat.bg">
+            <mat-icon [style.color]="stat.color">{{ stat.icon }}</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stat.value }}</span>
+            <span class="stat-label">{{ stat.label }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Produits récents -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Produits récents</h2>
+        <a mat-button routerLink="/products">Voir tout →</a>
+      </div>
+
+      <div class="products-table">
+        <div class="table-head">
+          <span>Nom</span>
+          <span>Catégorie</span>
+          <span>Prix</span>
+          <span>Stock</span>
+          <span>Statut</span>
+        </div>
+
+        @for (product of recentProducts(); track product.id) {
+          <div class="table-row">
+            <span class="product-name">{{ product.name }}</span>
+            <span class="badge-category">{{ product.category?.name || '—' }}</span>
+            <span class="product-price">{{ product.price | number:'1.2-2' }} FCFA</span>
+            <span>{{ product.stock_quantity }}</span>
+            <span class="badge-stock" [class.low]="product.stock_quantity < 5">
+              {{ product.stock_quantity < 5 ? 'Stock bas' : 'Disponible' }}
+            </span>
+          </div>
+        } @empty {
+          <div class="empty-state">
+            <mat-icon>inbox</mat-icon>
+            <p>Aucun produit pour l'instant</p>
+            <a mat-flat-button routerLink="/products/new">Ajouter un produit</a>
+          </div>
+        }
+      </div>
+    </div>
+
+  }
+</div>

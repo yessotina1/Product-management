@@ -1,0 +1,175 @@
+<div class="form-page">
+
+  <div class="form-header">
+    <button mat-icon-button routerLink="/products" class="back-btn">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1>{{ isEditMode() ? 'Modifier le produit' : 'Nouveau produit' }}</h1>
+      <p>{{ isEditMode() ? 'Mettez à jour les informations du produit' : 'Remplissez les informations du nouveau produit' }}</p>
+    </div>
+  </div>
+
+  @if (loadingData()) {
+    <div class="loading-center">
+      <mat-spinner diameter="44" />
+    </div>
+  } @else {
+    <div class="form-layout">
+
+      <!-- Formulaire -->
+      <div class="form-card">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+          <div class="form-section">
+            <h3>
+              <mat-icon>info</mat-icon>
+              Informations générales
+            </h3>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nom du produit</mat-label>
+              <input matInput formControlName="name" placeholder="Ex: T-shirt premium noir" />
+              <mat-icon matPrefix>label</mat-icon>
+              @if (getError('name')) {
+                <mat-error>{{ getError('name') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                placeholder="Décrivez le produit en détail..."
+                rows="4">
+              </textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              @if (getError('description')) {
+                <mat-error>{{ getError('description') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="form-section">
+            <h3>
+              <mat-icon>sell</mat-icon>
+              Prix et stock
+            </h3>
+
+            <div class="two-cols">
+              <mat-form-field appearance="outline">
+                <mat-label>Prix (FCFA)</mat-label>
+                <input matInput type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
+                <mat-icon matPrefix>currency_exchange</mat-icon>
+                @if (getError('price')) {
+                  <mat-error>{{ getError('price') }}</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Quantité en stock</mat-label>
+                <input matInput type="number" formControlName="stock_quantity" placeholder="0" min="0" />
+                <mat-icon matPrefix>warehouse</mat-icon>
+                @if (getError('stock_quantity')) {
+                  <mat-error>{{ getError('stock_quantity') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>
+              <mat-icon>category</mat-icon>
+              Catégorie
+            </h3>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Catégorie du produit</mat-label>
+              <mat-select formControlName="category_id" [disabled]="categories().length === 0">
+                @for (cat of categories(); track cat.id) {
+                  <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>folder</mat-icon>
+              @if (categories().length === 0) {
+                <mat-hint>Créez d'abord une catégorie pour pouvoir créer un produit.</mat-hint>
+              }
+              @if (getError('category_id')) {
+                <mat-error>{{ getError('category_id') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <button mat-stroked-button type="button" routerLink="/products" class="cancel-btn">
+              Annuler
+            </button>
+            <button mat-flat-button type="submit" class="submit-btn" [disabled]="loading()">
+              @if (loading()) {
+                <mat-spinner diameter="20" />
+              } @else {
+                <ng-container>
+                  <mat-icon>{{ isEditMode() ? 'save' : 'add_circle' }}</mat-icon>
+                  {{ isEditMode() ? 'Enregistrer' : 'Créer le produit' }}
+                </ng-container>
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Aperçu -->
+      <div class="preview-card">
+        <h3>
+          <mat-icon>preview</mat-icon>
+          Aperçu
+        </h3>
+
+        <div class="preview-content">
+          <div class="preview-name">
+            {{ form.get('name')?.value || 'Nom du produit' }}
+          </div>
+
+          <p class="preview-desc">
+            {{ form.get('description')?.value || 'La description apparaîtra ici...' }}
+          </p>
+
+          <div class="preview-meta">
+            <div class="meta-item">
+              <span class="meta-label">Prix</span>
+              <span class="meta-value price">
+                {{ form.get('price')?.value != null ? (form.get('price')!.value | number:'1.2-2') + ' FCFA' : '—' }}
+              </span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Stock</span>
+              <span class="meta-value">
+                {{ form.get('stock_quantity')?.value != null ? form.get('stock_quantity')!.value : '—' }}
+              </span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Catégorie</span>
+              <span class="meta-value">
+                {{ categories() | categoryName: (form.get('category_id')?.value ?? null) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="preview-badge"
+               [class.available]="(form.get('stock_quantity')?.value ?? 0) >= 5"
+               [class.low]="(form.get('stock_quantity')?.value ?? 0) > 0 && (form.get('stock_quantity')?.value ?? 0) < 5"
+               [class.empty]="(form.get('stock_quantity')?.value ?? 0) === 0">
+            @if ((form.get('stock_quantity')?.value ?? 0) === 0) { Rupture de stock }
+            @else if ((form.get('stock_quantity')?.value ?? 0) < 5) { Stock bas }
+            @else { Disponible }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

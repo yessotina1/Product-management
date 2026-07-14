@@ -1,0 +1,74 @@
+<div class="category-list">
+  <div class="page-header">
+    <div>
+      <h1>Catégories</h1>
+      <p>{{ total() }} catégorie{{ total() > 1 ? 's' : '' }} au total</p>
+    </div>
+    <a mat-flat-button routerLink="/categories/new" class="add-btn">
+      <mat-icon>add</mat-icon>
+      Nouvelle catégorie
+    </a>
+  </div>
+
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Rechercher une catégorie...</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" />
+      @if (searchTerm) {
+        <button matSuffix mat-icon-button (click)="searchTerm = ''; resetFilters()"><mat-icon>close</mat-icon></button>
+      }
+    </mat-form-field>
+
+    @if (searchTerm) {
+      <button mat-stroked-button (click)="resetFilters()" class="reset-btn">
+        <mat-icon>filter_alt_off</mat-icon>
+        Réinitialiser
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center"><mat-spinner diameter="44" /></div>
+  } @else {
+    <div class="table-wrapper">
+      <div class="table-head">
+        <span>Nom <button mat-icon-button (click)="toggleSort('name')" class="sort-btn"><mat-icon>{{ sortBy === 'name' ? (sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></button></span>
+        <span>Description</span>
+        <span>Produits</span>
+        <span>Créée le <button mat-icon-button (click)="toggleSort('created_at')" class="sort-btn"><mat-icon>{{ sortBy === 'created_at' ? (sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon></button></span>
+        <span class="actions-col">Actions</span>
+      </div>
+
+      @for (category of categories(); track category.id) {
+        <div class="table-row">
+          <span class="category-name">{{ category.name }}</span>
+          <span class="category-description">{{ category.description || '—' }}</span>
+          <span class="product-count">{{ category.products_count ?? 0 }}</span>
+          <span>{{ category.created_at ? (category.created_at | date:'dd/MM/yyyy') : '—' }}</span>
+          <span class="actions">
+            <a mat-icon-button [routerLink]="['/categories', category.id, 'edit']" matTooltip="Modifier"><mat-icon>edit</mat-icon></a>
+            <button mat-icon-button class="delete-btn" matTooltip="Supprimer" [disabled]="deleting() === category.id" (click)="confirmDelete(category)">
+              @if (deleting() === category.id) { <mat-spinner diameter="18" /> } @else { <mat-icon>delete</mat-icon> }
+            </button>
+          </span>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon>folder_open</mat-icon>
+          <p>Aucune catégorie trouvée</p>
+          @if (searchTerm) { <button mat-stroked-button (click)="resetFilters()">Effacer la recherche</button> }
+          @else { <a mat-flat-button routerLink="/categories/new" class="add-btn">Créer une catégorie</a> }
+        </div>
+      }
+    </div>
+
+    @if (lastPage() > 1) {
+      <div class="pagination">
+        <button mat-icon-button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"><mat-icon>chevron_left</mat-icon></button>
+        @for (page of pages; track page) { <button class="page-btn" [class.active]="page === currentPage()" (click)="goToPage(page)">{{ page }}</button> }
+        <button mat-icon-button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === lastPage()"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,135 @@
+<div class="product-list">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <h1>Produits</h1>
+      <p>{{ total() }} produit{{ total() > 1 ? 's' : '' }} au total</p>
+    </div>
+    <a mat-flat-button routerLink="/products/new" class="add-btn">
+      <mat-icon>add</mat-icon>
+      Nouveau produit
+    </a>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-label>Rechercher un produit...</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" />
+      @if (searchTerm) {
+        <button matSuffix mat-icon-button (click)="searchTerm = ''; onFilterChange()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Catégorie</mat-label>
+      <mat-select [(ngModel)]="categoryId" (ngModelChange)="onFilterChange()">
+        <mat-option value="">Toutes</mat-option>
+        @for (cat of categories(); track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (searchTerm || categoryId) {
+      <button mat-stroked-button (click)="resetFilters()" class="reset-btn">
+        <mat-icon>filter_alt_off</mat-icon>
+        Réinitialiser
+      </button>
+    }
+  </div>
+
+  <!-- Tableau -->
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner diameter="44" />
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <div class="table-head">
+        <span>Nom
+          <button mat-icon-button (click)="toggleSort('name')" class="sort-btn">
+            <mat-icon>{{ sortBy === 'name' ? (sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+          </button>
+        </span>
+        <span>Catégorie</span>
+        <span>Prix
+          <button mat-icon-button (click)="toggleSort('price')" class="sort-btn">
+            <mat-icon>{{ sortBy === 'price' ? (sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more' }}</mat-icon>
+          </button>
+        </span>
+        <span>Stock</span>
+        <span>Statut</span>
+        <span class="actions-col">Actions</span>
+      </div>
+
+      @for (product of products(); track product.id) {
+        <div class="table-row">
+          <span class="product-name">{{ product.name }}</span>
+          <span class="badge-category">{{ product.category?.name || '—' }}</span>
+          <span class="product-price">{{ product.price | number:'1.2-2' }} FCFA</span>
+          <span class="product-stock">{{ product.stock_quantity }}</span>
+          <span class="badge-stock" [class.low]="product.stock_quantity < 5" [class.empty]="product.stock_quantity === 0">
+            @if (product.stock_quantity === 0) { Rupture }
+            @else if (product.stock_quantity < 5) { Stock bas }
+            @else { Disponible }
+          </span>
+          <span class="actions">
+            <a mat-icon-button [routerLink]="['/products', product.id, 'edit']" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </a>
+            <button
+              mat-icon-button
+              class="delete-btn"
+              matTooltip="Supprimer"
+              [disabled]="deleting() === product.id"
+              (click)="confirmDelete(product)">
+              @if (deleting() === product.id) {
+                <mat-spinner diameter="18" />
+              } @else {
+                <mat-icon>delete</mat-icon>
+              }
+            </button>
+          </span>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <mat-icon>inventory_2</mat-icon>
+          <p>Aucun produit trouvé</p>
+          @if (searchTerm || categoryId) {
+            <button mat-stroked-button (click)="resetFilters()">Effacer les filtres</button>
+          } @else {
+            <a mat-flat-button routerLink="/products/new" class="add-btn">Ajouter un produit</a>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (lastPage() > 1) {
+      <div class="pagination">
+        <button mat-icon-button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (page of pages; track page) {
+          <button
+            class="page-btn"
+            [class.active]="page === currentPage()"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        }
+
+        <button mat-icon-button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === lastPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+
+</div>

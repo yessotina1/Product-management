@@ -1,0 +1,79 @@
+<div class="login-wrapper">
+
+  <div class="login-brand">
+    <div class="brand-icon">
+      <span class="material-icons">inventory_2</span>
+    </div>
+    <h1>StockPro</h1>
+    <p>Gestion de produits simplifiée</p>
+  </div>
+
+  <div class="login-card">
+    <h2>{{ isRegisterMode ? 'Créer un compte' : 'Connexion' }}</h2>
+    <p class="subtitle">{{ isRegisterMode ? 'Rejoignez la plateforme' : 'Bienvenue, connectez-vous pour continuer' }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      @if (isRegisterMode) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom complet</mat-label>
+          <input matInput formControlName="name" placeholder="Jean Dupont" autocomplete="name" />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Adresse email</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="vous@exemple.com" autocomplete="email" />
+        <mat-icon matPrefix>mail</mat-icon>
+        @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+          <mat-error>Email invalide</mat-error>
+        }
+        @if (form.get('email')?.hasError('required') && form.get('email')?.touched) {
+          <mat-error>Email requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" autocomplete="current-password" />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+          <mat-error>Minimum 8 caractères</mat-error>
+        }
+      </mat-form-field>
+
+      @if (isRegisterMode) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirmer le mot de passe</mat-label>
+          <input matInput formControlName="password_confirmation" [type]="hidePassword ? 'password' : 'text'" />
+          <mat-icon matPrefix>lock_reset</mat-icon>
+        </mat-form-field>
+      }
+
+      <button
+        mat-flat-button
+        type="submit"
+        class="submit-btn"
+        [disabled]="form.invalid || loading">
+        @if (loading) {
+          <mat-spinner diameter="20" />
+        } @else {
+          {{ isRegisterMode ? 'Créer le compte' : 'Se connecter' }}
+        }
+      </button>
+
+    </form>
+
+    <div class="toggle-mode">
+      <span>{{ isRegisterMode ? 'Déjà un compte ?' : 'Pas encore de compte ?' }}</span>
+      <button mat-button (click)="toggleMode()">
+        {{ isRegisterMode ? 'Se connecter' : 'S\'inscrire' }}
+      </button>
+    </div>
+  </div>
+
+</div>

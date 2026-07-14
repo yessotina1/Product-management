@@ -1,0 +1,30 @@
+<mat-toolbar class="app-header">
+  <button mat-icon-button (click)="onMenuToggle()" class="menu-btn">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <div class="brand">
+    <mat-icon class="brand-icon">inventory_2</mat-icon>
+    <span class="brand-name">StockPro</span>
+  </div>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn">
+    <div class="avatar">
+      {{ (auth.currentUser$ | async)?.name?.charAt(0)?.toUpperCase() || 'U' }}
+    </div>
+  </button>
+
+  <mat-menu #userMenu="matMenu" xPosition="before">
+    <div class="user-info-menu">
+      <strong>{{ (auth.currentUser$ | async)?.name }}</strong>
+      <span>{{ (auth.currentUser$ | async)?.email }}</span>
+    </div>
+    <mat-divider />
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Déconnexion</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
