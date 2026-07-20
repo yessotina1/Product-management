@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Product Management
 
 Application de gestion de produits avec catégories, construite sur Laravel pour l'API backend et Angular pour le frontend.
