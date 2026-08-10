@@ -43,6 +43,24 @@ php artisan serve --host=127.0.0.1 --port=8000
 
 L'API sera disponible sur `http://127.0.0.1:8000`.
 
+### Documentation API Swagger
+
+Depuis le dossier `api`, générer la documentation Swagger puis démarrer le serveur Laravel :
+
+```bash
+cd api
+php artisan l5-swagger:generate
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+Ouvrir ensuite Swagger UI à l'adresse `http://127.0.0.1:8000/api/documentation`.
+
+Après toute modification des annotations OpenAPI, régénérer la documentation :
+
+```bash
+php artisan l5-swagger:generate
+```
+
 ### 2. Frontend Angular
 
 Ouvrir un autre terminal et se positionner dans le dossier `frontend` :
@@ -67,6 +85,7 @@ php artisan serve
 php artisan migrate
 php artisan migrate:fresh --seed
 php artisan test
+php artisan l5-swagger:generate
 ```
 
 ### Frontend
